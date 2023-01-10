@@ -13,7 +13,8 @@ URL: https://github.com/EGI-Federation/ginfo
 Source: %{name}-%{version}.tar.gz
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-build
-
+BuildRequires: rsync
+BuildRequires: make
 Requires: python-ldap
 %if "%{?dist}" == ".el5"
 Requires: python-simplejson
