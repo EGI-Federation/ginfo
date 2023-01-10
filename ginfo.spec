@@ -1,22 +1,22 @@
-Name:		ginfo
-Version:	1.9.0
-Release:	1%{?dist}
-Summary:	A versatile tool for discovering Grid services
-Group:		Applications/Internet
-License:	ASL 2.0
-URL:		https://svnweb.cern.ch/trac/gridinfo/browser/ginfo
+Name: ginfo
+Version: 1.9.0
+Release: 1%{?dist}
+Summary: A versatile tool for discovering Grid services
+Group: Applications/Internet
+License: ASL 2.0
+URL: https://github.com/EGI-Federation/ginfo
 # The source for this package was pulled from upstream's vcs.  Use the
 # following commands to generate the tarball:
 #   svn export http://svnweb.cern.ch/guest/gridinfo/ginfo/tags/R_1_0_3 ginfo-1.0.3
 #  tar --gzip -czvf ginfo-1.0.3.tar.gz ginfo-1.0.3
 
-Source:		%{name}-%{version}.tar.gz
-BuildArch:	noarch
-BuildRoot:	%{_tmppath}/%{name}-%{version}-build
+Source: %{name}-%{version}.tar.gz
+BuildArch: noarch
+BuildRoot: %{_tmppath}/%{name}-%{version}-build
 
-Requires:      python-ldap
+Requires: python-ldap
 %if "%{?dist}" == ".el5"
-Requires:      python-simplejson
+Requires: python-simplejson
 %endif
 
 %description
@@ -39,7 +39,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %{_bindir}/ginfo
 %{_mandir}/man1/ginfo.1*
-%doc LICENSE
+%doc LICENSE.txt
 
 %changelog
 * Fri Aug 29 2014 Ivan Calvet <ivan.calvet@cern.ch> - 1.9.0-1
