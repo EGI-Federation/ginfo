@@ -40,7 +40,10 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %{_bindir}/ginfo
 %{_mandir}/man1/ginfo.1*
-%doc LICENSE.txt
+%doc %{_docdir}/%{name}-%{version}/README.md
+%doc %{_docdir}/%{name}-%{version}/AUTHORS.md
+%license %{_datadir}/licenses/%{name}-%{version}/COPYRIGHT
+%license %{_datadir}/licenses/%{name}-%{version}/LICENSE.txt
 
 %changelog
 * Fri Aug 29 2014 Ivan Calvet <ivan.calvet@cern.ch> - 1.9.0-1
