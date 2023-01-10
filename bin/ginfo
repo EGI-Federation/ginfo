@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 ##############################################################################
 # Copyright (c) CERN, 2012.
 #
@@ -26,7 +26,7 @@ except:
 	import simplejson as json
 import os
 import re
-import urllib2
+import urllib3
 import signal
 import copy
 from collections import OrderedDict
@@ -153,9 +153,9 @@ def main(argv):
     else:
         result = list_object() # get all the informations about the specified object
     if 'verbose' in OPTION:
-        print ''
+        print('')
     # result = clean(result)
-    print serialize_output(result)
+    print(serialize_output(result))
     sys.exit()
 
 def listObj():
@@ -217,7 +217,7 @@ def parse_option(argv):
     # Identify flags and put them in the OPTION dictionnary
     try:
         flags, args = getopt.getopt(argv, short_flags, long_flags)
-    except getopt.error, err:
+    except getopt.error as err:
         if str(err) == 'option --list requires argument':
             sys.exit(listObj())
         else:
@@ -241,10 +241,10 @@ def validate_option():
 
     # options
     if 'help' in OPTION:
-        print usage()
+        print(usage())
         sys.exit()
     if 'version' in OPTION:
-        print os.path.basename(sys.argv[0]) +' V'+VERSION
+        print(os.path.basename(sys.argv[0]) +' V'+VERSION)
         sys.exit()
     #if 'csv' in OPTION and 'json' in OPTION and 'list' not in OPTION:
     #    sys.exit('Error: Please choose between csv and json.')
@@ -253,7 +253,7 @@ def validate_option():
     #        print 'Output in csv formating'
     if 'json' in OPTION and 'list' not in OPTION:
         if 'verbose' in OPTION:
-            print 'Output in json formating'
+            print('Output in json formating')
     if 'host' not in OPTION:
         if 'LCG_GFAL_INFOSYS' in os.environ:
             OPTION['host'] = os.environ['LCG_GFAL_INFOSYS']
@@ -262,35 +262,35 @@ def validate_option():
     if ':' not in OPTION['host']:
         OPTION['host'] += ':2170'
     if 'verbose' in OPTION:
-        print 'Verbose mode enabled'
-        print 'The following host will be used:', OPTION['host']
+        print('Verbose mode enabled')
+        print('The following host will be used:', OPTION['host'])
 
     if 'bind' in OPTION:
         if 'verbose' in OPTION:
-            print 'The following binding will be used:', OPTION['bind']
+            print('The following binding will be used:', OPTION['bind'])
     else:
         OPTION['bind'] = 'o=glue'
         if 'verbose' in OPTION:
-            print 'The default binding will be used:', OPTION['bind']
+            print('The default binding will be used:', OPTION['bind'])
     if 'timeout' in OPTION:
         if 'verbose' in OPTION:
-            print 'Ldap timeout has been set to '+OPTION['timeout']+' second(s).'
+            print('Ldap timeout has been set to '+OPTION['timeout']+' second(s).')
     if 'ce' in OPTION:
         if 'verbose' in OPTION:
             # FIXME: Be more specific with CREAMCEID
-            print 'The --ce option will display the ComputingShare objects.'
+            print('The --ce option will display the ComputingShare objects.')
     if 'se' in OPTION:
         if 'verbose' in OPTION:
-            print 'The --se option will display the Service objects that are from one of these types: Storage, DPM, SRM, STaaS, org.dcache.storage .'
+            print('The --se option will display the Service objects that are from one of these types: Storage, DPM, SRM, STaaS, org.dcache.storage .')
     if 'service' in OPTION:
         if 'verbose' in OPTION:
-            print 'The --service option will display the Service objects.'
+            print('The --service option will display the Service objects.')
     if 'site' in OPTION:
         if 'verbose' in OPTION:
-            print 'The --site option will display the AdminDomain objects.'
+            print('The --site option will display the AdminDomain objects.')
     if 'vo' in OPTION:
         if 'verbose' in OPTION:
-            print 'The --vo option will filter results by VO (alias PolicyRule. Eg: vo:atlas, vo:cms, ...): '
+            print('The --vo option will filter results by VO (alias PolicyRule. Eg: vo:atlas, vo:cms, ...): ')
 
 def shortcuts():
     # Shortcut options add some objects and specific filters to the CONF dictionnary
@@ -346,7 +346,7 @@ def parse_conf(args):
             elif len(CONF) > 1:
                 sys.exit('Error 3: If you use more than one object you should precise which object each filter refers to. Eg: Object1.filter1=value1 Object2.filter2=value2 ...')
             else:
-                object = CONF.keys()[0]
+                object = list(CONF.keys())[0]
 
             if object in CONF:
                 CONF[object]['filter'][filter] = value
@@ -365,7 +365,7 @@ def parse_conf(args):
             elif len(CONF) > 1:
                 sys.exit('Error 3: If you use more than one object you should precise which object each attributes refers to. Eg: Object1.attribute1 Object2.attribute2 ...')
             else:
-                object = CONF.keys()[0]
+                object = list(CONF.keys())[0]
                 attribute = arg
             if object in CONF:
                 CONF[object]['attribute'].append(attribute)
@@ -385,18 +385,18 @@ def validate_conf():
     # Object
     if 'verbose' in OPTION:
         if len(CONF) == 1:
-            print 'The specified object is '+CONF.keys()[0]+'.'
+            print('The specified object is '+list(CONF.keys())[0]+'.')
         else:
-            print 'The specified objects are: '+', '.join(CONF.keys())+'.'
+            print('The specified objects are: '+', '.join(list(CONF.keys()))+'.')
     if 'list' in OPTION:
         if len(CONF) > 1:
             sys.exit('Error 6: You have too many objects. You can only see the values of an attribute from one object.')
         if OPTION['list'] in ELTS:
             if 'verbose' in OPTION:
-                print 'List all the attributes from the following object:', OPTION['list']
-        elif OPTION['list'] in ELTS[CONF.keys()[0]]:
+                print('List all the attributes from the following object:', OPTION['list'])
+        elif OPTION['list'] in ELTS[list(CONF.keys())[0]]:
             if 'verbose' in OPTION:
-                print 'List all the possible values for the following attribute:', OPTION['list']
+                print('List all the possible values for the following attribute:', OPTION['list'])
 
         else:
             sys.exit('Error 7: '+OPTION['list']+' is not a valid attribute.')
@@ -419,7 +419,7 @@ def validate_conf():
         if obj not in OPTION['objects'].values():
             OPTION['objects'] = sortObjects(obj)
     items = OPTION['objects'].items()
-    items.reverse()
+    list(items).reverse()
     OPTION['objects'] = OrderedDict(items)
     if sorted(CONF.keys()) != sorted(OPTION['objects'].values()):
         sys.exit('Error 8: You canno\'t combine these objects: '+', '.join(CONF))
@@ -433,7 +433,7 @@ def validate_conf():
                     sys.exit('Error 9: '+filter+' is not a valid filter from the object '+obj)
             if 'verbose' in OPTION:
                 for filter in CONF[obj]['filter']:
-                    print 'Filter results by the following '+obj+'.'+filter+':', CONF[obj]['filter'][filter]
+                    print('Filter results by the following '+obj+'.'+filter+':', CONF[obj]['filter'][filter])
 
         # Attributes
         if CONF[obj]['attribute']:
@@ -443,7 +443,7 @@ def validate_conf():
         elif CONF[obj]['visible']:
             CONF[obj]['attribute'] = ELTS[obj].keys()
         if 'verbose' in OPTION:
-            print 'The following attribute(s) of '+obj+' will be displayed:', ', '.join(CONF[obj]['attribute'])
+            print('The following attribute(s) of '+obj+' will be displayed:', ', '.join(CONF[obj]['attribute']))
 
 def request(filter=None):
     """Returns the result of the ldap request with the filter given"""
@@ -460,7 +460,6 @@ def request(filter=None):
         try:
             con = ldap.initialize('ldap://'+OPTION['host'])
             if filter:
-                print filter
                 result = con.result(con.search(OPTION['bind'], ldap.SCOPE_SUBTREE, filter))[1]
             else:
                 result = con.result(con.search(OPTION['bind'], ldap.SCOPE_SUBTREE))[1]
@@ -521,7 +520,7 @@ def list_attributes():
         attr_list = ELTS[OPTION['list']]
     else:
         attribute = OPTION['list']
-        object = CONF.keys()[0]
+        object = list(CONF.keys())[0]
         id = 'GLUE2' + ELTS[object][attribute]
         result = request('objectClass=GLUE2' + object)
         attr_list = []
@@ -560,6 +559,19 @@ def serialize_output(result):
             csv_list.append(','.join(tmp_list))
         output = '\n'.join(csv_list)
     elif 'json' in OPTION:
+        for entry in result:
+                if isinstance(entry,bytes):
+                    result[entry.decode("utf-8")] = result[entry]
+                    del result[entry]
+        for entry in result:
+            for obj in result[entry]:
+                for attribute in result[entry][obj]:
+                    i=0
+                    for value in result[entry][obj][attribute]:
+                        if isinstance(value,bytes):
+                            value = value.decode("utf-8")
+                            result[entry][obj][attribute][i]=value
+                        i+=1
         output = json.dumps(result)
     else:
         output_list = []
@@ -581,7 +593,7 @@ def serialize_output(result):
                             if not result[id][obj][att]:
                                 res += 'None'
                             else:
-                                res += ', '.join(result[id][obj][att])
+                                res = ",".join([s.decode("utf-8") for s in result[id][obj][att]])
                             output_list.append(res)
                 output_list.append('')
         output = '\n'.join(output_list)
