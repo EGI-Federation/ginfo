@@ -5,19 +5,15 @@ Summary: A versatile tool for discovering Grid services
 Group: Applications/Internet
 License: ASL 2.0
 URL: https://github.com/EGI-Federation/ginfo
-# The source for this package was pulled from upstream's vcs.  Use the
-# following commands to generate the tarball:
-#   svn export http://svnweb.cern.ch/guest/gridinfo/ginfo/tags/R_1_0_3 ginfo-1.0.3
-#  tar --gzip -czvf ginfo-1.0.3.tar.gz ginfo-1.0.3
 
 Source: %{name}-%{version}.tar.gz
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-build
 BuildRequires: rsync
 BuildRequires: make
-Requires: python-ldap
+Requires: python3-ldap
 %if "%{?dist}" == ".el5"
-Requires: python-simplejson
+Requires: python3-simplejson
 %endif
 
 %description
