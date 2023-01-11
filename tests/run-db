@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Requirements: psmisc, and a BDII (openldap-servers, glue-schema, bdii,...)
+# Requirements: psmisc, and a local BDII installation
 
 killall slapd
 rm -rf /var/run/bdii/db/glue2/*
