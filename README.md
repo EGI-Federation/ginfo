@@ -55,6 +55,24 @@ using packages.
 
 Get the source by cloning this repository and do a `make install`.
 
+## Running tests
+
+Tests are in [tests/](tests/) folder.
+
+> Most of the tests are currently outdated and turned off.
+
+Requirements:
+- psmisc, time, python3-commands
+- ginfo in `PATH`
+- a BDII installed locally (see bdii-config-site)
+
+> The tests will delete the local BDII database
+
+1. Move to folder [./tests](./tests)
+1. Launch server using [`./run-db`](tests/run-db)
+1. export PATH=../bin:$PATH
+1. Run tests using [`./test-ginfo.py`](tests/test-ginfo.py)
+
 ## Usage
 
 See usage in the manpage ([ginfo (1)](man/ginfo.1)).
