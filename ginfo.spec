@@ -12,9 +12,6 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-build
 BuildRequires: rsync
 BuildRequires: make
 Requires: python3-ldap
-%if "%{?dist}" == ".el5"
-Requires: python3-simplejson
-%endif
 
 %description
 A versatile tool for discovering Grid services by querying either 
