@@ -14,8 +14,6 @@ will be used.
 Specify the binding (o=glue by default).
 .IP "\fB-l, --list\fP     \fIattribute\fP"
 List all the possible values of the specified attribute.
-.IP "\fB-c, --csv\fP"
-Output in CSV formating
 .IP "\fB-j, --json\fP"
 Output in JSON formating
 .IP "\fB-t, --timeout\fP"
@@ -82,12 +80,6 @@ JSON output for an Endpoint:
     "QualityLevel": Value,
     "ID": Value,
     "InterfaceVersion": Value}, ...]
-.br
-.PP
-CSV output for an Endpoint:
-    HealthState,Implementor,InterfaceName,ServingState,URL,
-    ImplementationVersion,Capability,ServiceForeignKey,QualityLevel,
-    ID,InterfaceVersion
 
 .SH EXAMPLES
 .IP "1) List all information for all Endpoint attributes"
@@ -110,8 +102,8 @@ ginfo Endpoint InterfaceName=org.glite.FileTransfer ID InterfaceVersion
 .IP "6) Show all available information about these Endpoints"
 ginfo Endpoint InterfaceName=org.glite.FileTransfer
 
-.IP "7) Export to CSV"
-ginfo --csv Endpoint InterfaceName=org.glite.FileTransfer
+.IP "7) Export to JSON"
+ginfo --json Endpoint InterfaceName=org.glite.FileTransfer
 
 .SH AUTHOR
 Ivan Calvet <ivan.calvet at cern dot ch>
