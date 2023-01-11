@@ -1,4 +1,5 @@
 build/
+tests/test.ldif
 .envrc
 flake.lock
 flake.nix
