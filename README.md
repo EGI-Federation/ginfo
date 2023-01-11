@@ -55,6 +55,34 @@ using packages.
 
 Get the source by cloning this repository and do a `make install`.
 
+## Usage
+
+See usage in the manpage ([ginfo (1)](man/ginfo.1)).
+
+```shell
+# List all information for all Endpoint attributes
+ginfo --host lcg-bdii.egi.eu Endpoint
+
+# Use the host from the LCG_GFAL_INFOSYS environment variable and list all Location countries
+export LCG_GFAL_INFOSYS=lcg-bdii.egi.eu:2170
+ginfo Location country
+
+# List all the Service types
+ginfo -l Type Service
+
+# List all IDs from Endpoint which have 'org.glite.FileTransfer' as name of Interface
+ginfo Endpoint InterfaceName=org.glite.FileTransfer ID
+
+# Show the version too
+ginfo Endpoint InterfaceName=org.glite.FileTransfer ID InterfaceVersion
+
+# Show all available information about these Endpoints"
+ginfo Endpoint InterfaceName=org.glite.FileTransfer
+
+# Export to CSV
+ginfo --csv Endpoint InterfaceName=org.glite.FileTransfer
+```
+
 ## Preparing a release
 
 - Prepare a changelog from the last version, including contributors' names
