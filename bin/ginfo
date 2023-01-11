@@ -669,7 +669,7 @@ def list_attributes():
         attr_list = []
         for res in result:
             if id in res[1]:
-                for att in res[1][id]:
+                for att in [x.decode("utf-8") for x in res[1][id]]:
                     if att not in attr_list:
                         attr_list.append(att)
             else:
@@ -677,6 +677,32 @@ def list_attributes():
                     attr_list.append("None")
         attr_list.sort()
     return attr_list
+
+
+def decode_dict(d):
+    """Convert keys and values of a dict from byte to string"""
+    rval = {}
+    if not isinstance(d, dict):
+        if isinstance(d, (tuple, list, set)):
+            v = [decode_dict(x) for x in d]
+            return v
+        else:
+            if isinstance(d, bytes):
+                d = d.decode("utf-8")
+            return d
+
+    for k, v in d.items():
+        if isinstance(k, bytes):
+            k = k.decode("utf-8")
+        if isinstance(v, bytes):
+            v = v.decode("utf-8")
+        if isinstance(v, dict):
+            v = decode_dict(v)
+        elif isinstance(v, (tuple, list, set)):
+            v = [decode_dict(x) for x in v]
+        rval[k] = v
+
+    return rval
 
 
 def serialize_output(result):
@@ -703,19 +729,7 @@ def serialize_output(result):
             csv_list.append(",".join(tmp_list))
         output = "\n".join(csv_list)
     elif "json" in OPTION:
-        for entry in result:
-            if isinstance(entry, bytes):
-                result[entry.decode("utf-8")] = result[entry]
-                del result[entry]
-        for entry in result:
-            for obj in result[entry]:
-                for attribute in result[entry][obj]:
-                    i = 0
-                    for value in result[entry][obj][attribute]:
-                        if isinstance(value, bytes):
-                            value = value.decode("utf-8")
-                            result[entry][obj][attribute][i] = value
-                        i += 1
+        result = decode_dict(result)
         output = json.dumps(result)
     else:
         output_list = []
