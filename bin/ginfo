@@ -22,10 +22,7 @@ import sys
 import getopt
 import json
 import os
-import re
-import urllib3
 import signal
-import copy
 from collections import OrderedDict
 
 VERSION = '1.9.0'
