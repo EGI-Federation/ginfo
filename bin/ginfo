@@ -203,7 +203,8 @@ def listObj():
 def usage():
     """Returns the usage message"""
 
-    usage = """Usage: ginfo [options] [Object(s)] [attribute(s)_to_filter='value of the attribute'] [attribute(s)_to_display]
+    usage = """
+    Usage: ginfo [options] [Object(s)] [attribute(s)_to_filter='value of the attribute'] [attribute(s)_to_display]
 
     List attributes corresponding to one or multiple object(s).
     By default, all the attributes of an object are displayed.
