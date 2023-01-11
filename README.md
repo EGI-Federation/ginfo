@@ -65,22 +65,22 @@ ginfo --host lcg-bdii.egi.eu Endpoint
 
 # Use the host from the LCG_GFAL_INFOSYS environment variable and list all Location countries
 export LCG_GFAL_INFOSYS=lcg-bdii.egi.eu:2170
-ginfo Location country
+ginfo Location Country
 
 # List all the Service types
 ginfo -l Type Service
 
-# List all IDs from Endpoint which have 'org.glite.FileTransfer' as name of Interface
-ginfo Endpoint InterfaceName=org.glite.FileTransfer ID
+# List all IDs from Endpoint which have 'bdii_top' as name of Interface
+ginfo Endpoint InterfaceName=bdii_top ID
 
 # Show the version too
-ginfo Endpoint InterfaceName=org.glite.FileTransfer ID InterfaceVersion
+ginfo Endpoint InterfaceName=bdii_top ID InterfaceVersion
 
 # Show all available information about these Endpoints"
-ginfo Endpoint InterfaceName=org.glite.FileTransfer
+ginfo Endpoint InterfaceName=bdii_top
 
-# Export to CSV
-ginfo --csv Endpoint InterfaceName=org.glite.FileTransfer
+# Export to JSON
+ginfo --json Endpoint InterfaceName=bdii_top
 ```
 
 ## Preparing a release
