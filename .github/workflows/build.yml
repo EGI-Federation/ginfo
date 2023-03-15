@@ -29,14 +29,14 @@ jobs:
           path: |
             build/RPMS/noarch/ginfo-*.el7.noarch.rpm
 
-  # Use a matrix for CentOS Stream versions
+  # Use a matrix for AlmaLinux versions
   build:
     strategy:
       matrix:
-        centos-version: [8, 9]
-    name: Build CentOS ${{ matrix.centos-version }} RPMs
+        almalinux-version: [8, 9]
+    name: Build AlmaLinux ${{ matrix.almalinux-version }} RPMs
     runs-on: ubuntu-latest
-    container: quay.io/centos/centos:stream${{ matrix.centos-version }}
+    container: almalinux:${{ matrix.almalinux-version }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -48,13 +48,13 @@ jobs:
       - name: build rpm
         run: |
           make clean rpm
-          rpmlint --file .rpmlint.ini build/RPMS/noarch/*.el${{ matrix.centos-version }}.noarch.rpm
+          rpmlint --file .rpmlint.ini build/RPMS/noarch/*.el${{ matrix.almalinux-version }}.noarch.rpm
       - name: Upload RPMs
         uses: actions/upload-artifact@v3
         with:
-          name: rpms${{ matrix.centos-version }}
+          name: rpms${{ matrix.almalinux-version }}
           path: |
-            build/RPMS/noarch/ginfo-*.el${{ matrix.centos-version }}.noarch.rpm
+            build/RPMS/noarch/bdii-config-site-*.el${{ matrix.almalinux-version }}.noarch.rpm
 
   install-centos7:
     name: Install CentOS 7 RPMs
@@ -69,11 +69,11 @@ jobs:
         run: |
           yum localinstall -y ginfo-*.el7.noarch.rpm
 
-  centos8-install:
-    name: Install CentOS Stream 8 RPMs
+  almalinux8-install:
+    name: Install AlmaLinux 8 RPMs
     needs: build
     runs-on: ubuntu-latest
-    container: quay.io/centos/centos:stream8
+    container: almalinux:8
     steps:
       - uses: actions/download-artifact@v3
         with:
@@ -82,11 +82,11 @@ jobs:
         run: |
           yum localinstall -y ginfo-*.el8.noarch.rpm
 
-  centos9-install:
-    name: Install CentOS Stream 9 RPMs
+  almalinux9-install:
+    name: Install AlmaLinux 9 RPMs
     needs: build
     runs-on: ubuntu-latest
-    container: quay.io/centos/centos:stream9
+    container: almalinux:9
     steps:
       - uses: actions/download-artifact@v3
         with:
