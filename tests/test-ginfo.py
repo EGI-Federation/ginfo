@@ -440,8 +440,7 @@ class TestGinfo(unittest.TestCase):
                 'PolicyRule,EndpointQualityLevel,EndpointCapability\n"VO:atlas",production,"capability_b,capability_e"',
             ),
             (
-                # noqa: E501
-                "-d domain_b --impv 5.0.0 -m implementation_name_b -n interface_name_b --cap capability_e --vo VO:atlas -u ldap://host:2170/ZZZ --intv 3.0.1 --ql production --type service_type_a --id service_3 id",
+                "-d domain_b --impv 5.0.0 -m implementation_name_b -n interface_name_b --cap capability_e --vo VO:atlas -u ldap://host:2170/ZZZ --intv 3.0.1 --ql production --type service_type_a --id service_3 id",  # noqa: E501
                 "ServiceID\nservice_3",
             ),
             ("--vo ALL ServiceID", "ServiceID\nservice_1\nservice_2"),
