@@ -27,4 +27,4 @@ jobs:
           # Start Database
           ./run-db
           # Run the tests
-          ./run-tests.sh
+          ./test-ginfo.py
