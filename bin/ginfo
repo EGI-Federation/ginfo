@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 ##############################################################################
 # Copyright (c) CERN, 2012.
+# Copyright (c) Contributors, see list at
+#    https://github.com/EGI-Federation/ginfo/graphs/contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,146 +19,173 @@
 
 """Ginfo - Developped by Ivan Calvet for CERN - ivan.calvet@cern.ch"""
 
-import ldap
-import sys
 import getopt
-try:
-	import json
-except:
-	import simplejson as json
+import json
 import os
-import re
-import urllib3
 import signal
-import copy
+import sys
 from collections import OrderedDict
 
-VERSION = '1.9.0'
+import ldap
+
+VERSION = "1.9.0"
 TIMEOUT = 60
 
-# Available flags. Format: FLAGS = {'long_flag1': ['short_flag1', <is_parameter_needed>], ...}
+# Available flags
+# Format: FLAGS = {'long_flag1': ['short_flag1', <is_parameter_needed>], ...}
 FLAGS = {
-    'host': ['H', True],
-    'bind': ['b', True],
-    'list': ['l', True],
-    #'clean': [None, False],
-    #'strict': ['s', False],
-    #'csv': ['c', False],
-    'json': ['j', False],
-    'timeout': ['t', True],
-    'verbose': ['v', False],
-    'version': ['V', False],
-    'help': ['h', False],
-    'ce': [None, False],
-    'se': [None, False],
-    'service': [None, False],
-    'site': [None, False],
-    'vo': [None, True],
-    }
-
-# Available elements. Format: ELTS = {'Object1': OrderedDict([('attribute1': 'name of the attribute1 in the bdii'), ...]), ...}
-ELTS = {
-'AccessPolicy':
-    OrderedDict([('ID', 'PolicyID'),
-     ('Name', 'EntityName'),
-     ('Scheme', 'PolicyScheme'),
-     ('Rule', 'PolicyRule'),
-     ('EndpointID', 'AccessPolicyEndpointForeignKey')]),
-'AdminDomain':
-    OrderedDict([('ID', 'DomainID'),
-     ('Description', 'DomainDescription')]),
-'ComputingManager':
-    OrderedDict([('ID', 'ManagerID'),
-     ('ProductName', 'ManagerProductName'),
-     ('ProductVersion', 'ManagerProductVersion'),
-     ('ServiceID', 'ComputingManagerComputingServiceForeignKey')]),
-'ComputingShare':
-    OrderedDict([('ID', 'ShareID'),
-     ('MaxCPUTime', 'ComputingShareMaxCPUTime'),
-     ('MaxWallTime', 'ComputingShareMaxWallTime'),
-     ('ServingState', 'ComputingShareServingState'),
-     ('RunningJobs', 'ComputingShareRunningJobs'),
-     ('WaitingJobs', 'ComputingShareWaitingJobs'),
-     ('ExecutionEnvironmentID', 'ComputingShareExecutionEnvironmentForeignKey'),
-     ('EndpointID', 'ComputingShareComputingEndpointForeignKey'),
-     ('Other', 'EntityOtherInfo')]),
-'Endpoint':
-    OrderedDict([('ID', 'EndpointID'),
-     ('URL', 'EndpointURL'),
-     ('Capability', 'EndpointCapability'),
-     ('InterfaceName', 'EndpointInterfaceName'),
-     ('InterfaceVersion', 'EndpointInterfaceVersion'),
-     ('Implementor', 'EndpointImplementor'),
-     ('ImplementationVersion', 'EndpointImplementationVersion'),
-     ('QualityLevel', 'EndpointQualityLevel'),
-     ('HealthState', 'EndpointHealthState'),
-     ('ServingState', 'EndpointServingState'),
-     ('ServiceID', 'EndpointServiceForeignKey')]),
-'ExecutionEnvironment':
-    OrderedDict([('ID', 'ResourceID'),
-     ('OSName', 'ExecutionEnvironmentOSName'),
-     ('ConnectivityOut', 'ExecutionEnvironmentConnectivityOut'),
-     ('MainMemorySize', 'ExecutionEnvironmentMainMemorySize'),
-     ('VirtualMemorySize', 'ExecutionEnvironmentVirtualMemorySize')]),
-#'GlueCESEBindGroupCEUniqueID':
-#    OrderedDict([]),
-'Location':
-    OrderedDict([('ID', 'LocationID'),
-     ('Country', 'LocationCountry'),
-     ('Latitude', 'LocationLatitude'),
-     ('Longitude', 'LocationLongitude')]),
-'MappingPolicy':
-    OrderedDict([('ID', 'PolicyID'),
-     ('Scheme', 'PolicyScheme'),
-     ('Rule', 'PolicyRule'),
-     ('ShareID', 'MappingPolicyShareForeignKey')]),
-'Service':
-    OrderedDict([('ID', 'ServiceID'),
-     ('Capability', 'ServiceCapability'),
-     ('Type', 'ServiceType'),
-     ('QualityLevel', 'ServiceQualityLevel'),
-     ('StatusInfo', 'ServiceStatusInfo'),
-     ('DomainID', 'ServiceAdminDomainForeignKey'),]),
-'Share':
-    OrderedDict([('ID', 'ShareID'),
-     ('ServiceID', 'ShareServiceForeignKey')]),
-'StorageShare':
-    OrderedDict([('ID', 'ShareID'),
-    ('SharingID', 'StorageShareSharingID'),
-    ('Path', 'StorageSharePath'),
-    ('AccessMode', 'StorageShareAccessMode'),
-    ('AccessLatency', 'StorageShareAccessLatency'),
-    ('ServingState', 'StorageShareServingState'),
-    ('RetentionPolicy', 'StorageShareRetentionPolicy'),
-    ('ExpirationMode', 'StorageShareExpirationMode'),
-    ('DefaultLifeTime', 'StorageShareDefaultLifeTime'),
-    ('MaximumLifeTime', 'StorageShareMaximumLifeTime'),
-    ('Tag', 'StorageShareTag')]),
-#'ToComputingService':
-#    OrderedDict([]),
+    "host": ["H", True],
+    "bind": ["b", True],
+    "list": ["l", True],
+    # 'clean': [None, False],
+    # 'strict': ['s', False],
+    # 'csv': ['c', False],
+    "json": ["j", False],
+    "timeout": ["t", True],
+    "verbose": ["v", False],
+    "version": ["V", False],
+    "help": ["h", False],
+    "ce": [None, False],
+    "se": [None, False],
+    "service": [None, False],
+    "site": [None, False],
+    "vo": [None, True],
 }
 
-# Dictionnary made to store the chosen  options. Format: OPTION = {'option1': 'value1', ...}
+# Available elements
+# Format: ELTS = {'Object': OrderedDict([('attribute': 'name in the bdii'), ...]), ...}
+ELTS = {
+    "AccessPolicy": OrderedDict(
+        [
+            ("ID", "PolicyID"),
+            ("Name", "EntityName"),
+            ("Scheme", "PolicyScheme"),
+            ("Rule", "PolicyRule"),
+            ("EndpointID", "AccessPolicyEndpointForeignKey"),
+        ]
+    ),
+    "AdminDomain": OrderedDict(
+        [("ID", "DomainID"), ("Description", "DomainDescription")]
+    ),
+    "ComputingManager": OrderedDict(
+        [
+            ("ID", "ManagerID"),
+            ("ProductName", "ManagerProductName"),
+            ("ProductVersion", "ManagerProductVersion"),
+            ("ServiceID", "ComputingManagerComputingServiceForeignKey"),
+        ]
+    ),
+    "ComputingShare": OrderedDict(
+        [
+            ("ID", "ShareID"),
+            ("MaxCPUTime", "ComputingShareMaxCPUTime"),
+            ("MaxWallTime", "ComputingShareMaxWallTime"),
+            ("ServingState", "ComputingShareServingState"),
+            ("RunningJobs", "ComputingShareRunningJobs"),
+            ("WaitingJobs", "ComputingShareWaitingJobs"),
+            ("ExecutionEnvironmentID", "ComputingShareExecutionEnvironmentForeignKey"),
+            ("EndpointID", "ComputingShareComputingEndpointForeignKey"),
+            ("Other", "EntityOtherInfo"),
+        ]
+    ),
+    "Endpoint": OrderedDict(
+        [
+            ("ID", "EndpointID"),
+            ("URL", "EndpointURL"),
+            ("Capability", "EndpointCapability"),
+            ("InterfaceName", "EndpointInterfaceName"),
+            ("InterfaceVersion", "EndpointInterfaceVersion"),
+            ("Implementor", "EndpointImplementor"),
+            ("ImplementationVersion", "EndpointImplementationVersion"),
+            ("QualityLevel", "EndpointQualityLevel"),
+            ("HealthState", "EndpointHealthState"),
+            ("ServingState", "EndpointServingState"),
+            ("ServiceID", "EndpointServiceForeignKey"),
+        ]
+    ),
+    "ExecutionEnvironment": OrderedDict(
+        [
+            ("ID", "ResourceID"),
+            ("OSName", "ExecutionEnvironmentOSName"),
+            ("ConnectivityOut", "ExecutionEnvironmentConnectivityOut"),
+            ("MainMemorySize", "ExecutionEnvironmentMainMemorySize"),
+            ("VirtualMemorySize", "ExecutionEnvironmentVirtualMemorySize"),
+        ]
+    ),
+    # 'GlueCESEBindGroupCEUniqueID':
+    #     OrderedDict([]),
+    "Location": OrderedDict(
+        [
+            ("ID", "LocationID"),
+            ("Country", "LocationCountry"),
+            ("Latitude", "LocationLatitude"),
+            ("Longitude", "LocationLongitude"),
+        ]
+    ),
+    "MappingPolicy": OrderedDict(
+        [
+            ("ID", "PolicyID"),
+            ("Scheme", "PolicyScheme"),
+            ("Rule", "PolicyRule"),
+            ("ShareID", "MappingPolicyShareForeignKey"),
+        ]
+    ),
+    "Service": OrderedDict(
+        [
+            ("ID", "ServiceID"),
+            ("Capability", "ServiceCapability"),
+            ("Type", "ServiceType"),
+            ("QualityLevel", "ServiceQualityLevel"),
+            ("StatusInfo", "ServiceStatusInfo"),
+            ("DomainID", "ServiceAdminDomainForeignKey"),
+        ]
+    ),
+    "Share": OrderedDict([("ID", "ShareID"), ("ServiceID", "ShareServiceForeignKey")]),
+    "StorageShare": OrderedDict(
+        [
+            ("ID", "ShareID"),
+            ("SharingID", "StorageShareSharingID"),
+            ("Path", "StorageSharePath"),
+            ("AccessMode", "StorageShareAccessMode"),
+            ("AccessLatency", "StorageShareAccessLatency"),
+            ("ServingState", "StorageShareServingState"),
+            ("RetentionPolicy", "StorageShareRetentionPolicy"),
+            ("ExpirationMode", "StorageShareExpirationMode"),
+            ("DefaultLifeTime", "StorageShareDefaultLifeTime"),
+            ("MaximumLifeTime", "StorageShareMaximumLifeTime"),
+            ("Tag", "StorageShareTag"),
+        ]
+    ),
+    # 'ToComputingService':
+    #     OrderedDict([]),
+}
+
+# Dictionnary made to store the chosen  options
+# Format: OPTION = {'option1': 'value1', ...}
 OPTION = {}
 CONF = {}
 
+
 def main(argv):
-    """Main function that launches the other functions""" 
+    """Main function that launches the other functions"""
 
     args = parse_option(argv)
     validate_option()
     shortcuts()
     parse_conf(args)
     validate_conf()
-    if 'list' in OPTION:
-        result = list_attributes() # option --list
+    if "list" in OPTION:
+        # option --list
+        result = list_attributes()
     else:
-        result = list_object() # get all the informations about the specified object
-    if 'verbose' in OPTION:
-        print('')
+        # get all the informations about the specified object
+        result = list_object()
+    if "verbose" in OPTION:
+        print("")
     # result = clean(result)
     print(serialize_output(result))
     sys.exit()
+
 
 def listObj():
     listObj = ""
@@ -164,18 +193,20 @@ def listObj():
         attrs = "\t\t"
         last_line = ", ".join(ELTS[obj])
         while len(last_line) > 64:
-            comma = last_line[:64].rfind(",")+2
+            comma = last_line[:64].rfind(",") + 2
             attrs += last_line[:comma] + "\n\t\t"
             last_line = last_line[comma:]
         listObj += "\t" + obj + ":\n" + attrs + last_line + ".\n"
     return listObj
 
+
 def usage():
     """Returns the usage message"""
 
-    usage = '''Usage: ginfo [options] [Object(s)] [attribute(s)_to_filter='value of the attribute'] [attribute(s)_to_display]
+    usage = """
+    Usage: ginfo [options] [Object(s)] [attribute(s)_to_filter='value of the attribute'] [attribute(s)_to_display]
 
-    List attributes corresponding to one or multiple object(s). 
+    List attributes corresponding to one or multiple object(s).
     By default, all the attributes of an object are displayed.
 
     [OPTIONS]
@@ -184,7 +215,7 @@ def usage():
                                 used.
     -b, --bind      binding     Specify the binding (o=glue by default).
     -l, --list      value       List all the possible values of the specified
-                                attribute or the corresponding attributes of 
+                                attribute or the corresponding attributes of
                                 an object.
     -j, --json                  Output in JSON format
     -t, --timeout               Change the ldap timeout (15 seconds by default).
@@ -193,37 +224,39 @@ def usage():
     -h, --help                  Print this helpful message
 
     [OBJECTS AND CORRESPONDING ATTRIBUTES]
-'''
+    """  # noqa: E501
     usage += listObj()
     return usage
 
+
 def parse_option(argv):
-    """Parse the selected options and put them in the OPTION dictionnary""" 
+    """Parse the selected options and put them in the OPTION dictionnary"""
 
     # Build the correct sequence to parse the flags with getopt
-    short_flags = ''
-    long_flags = [[], []] # Long flags with a short flag, or without
+    short_flags = ""
+    # Long flags with a short flag, or without
+    long_flags = [[], []]
     for i in FLAGS:
         j = 1
         if FLAGS[i][0]:
             j = 0
             short_flags += FLAGS[i][0]
             if FLAGS[i][1]:
-                short_flags += ':'
+                short_flags += ":"
         long_flags[j].append(i)
         if FLAGS[i][1]:
-            long_flags[j][-1] += '='
+            long_flags[j][-1] += "="
     long_flags = long_flags[0] + long_flags[1]
     # Identify flags and put them in the OPTION dictionnary
     try:
         flags, args = getopt.getopt(argv, short_flags, long_flags)
     except getopt.error as err:
-        if str(err) == 'option --list requires argument':
+        if str(err) == "option --list requires argument":
             sys.exit(listObj())
         else:
             sys.exit(usage())
     for flag, arg in flags:
-        flag = flag[flag.rfind('-')+1:]
+        flag = flag[flag.rfind("-") + 1 :]
         for i in FLAGS:
             if flag in (i, FLAGS[i][0]):
                 if i not in OPTION:
@@ -231,373 +264,507 @@ def parse_option(argv):
                         OPTION[i] = arg
                     else:
                         OPTION[i] = True
-                    break 
+                    break
                 else:
                     sys.exit("Error 1: Don't use a flag more than once.")
     return args
+
 
 def validate_option():
     """Prints verbose messages and checks for errors"""
 
     # options
-    if 'help' in OPTION:
+    if "help" in OPTION:
         print(usage())
         sys.exit()
-    if 'version' in OPTION:
-        print(os.path.basename(sys.argv[0]) +' V'+VERSION)
+    if "version" in OPTION:
+        print(os.path.basename(sys.argv[0]) + " V" + VERSION)
         sys.exit()
-    #if 'csv' in OPTION and 'json' in OPTION and 'list' not in OPTION:
-    #    sys.exit('Error: Please choose between csv and json.')
-    #elif 'csv' in OPTION and 'list' not in OPTION:
-    #    if 'verbose' in OPTION:
-    #        print 'Output in csv formating'
-    if 'json' in OPTION and 'list' not in OPTION:
-        if 'verbose' in OPTION:
-            print('Output in json formating')
-    if 'host' not in OPTION:
-        if 'LCG_GFAL_INFOSYS' in os.environ:
-            OPTION['host'] = os.environ['LCG_GFAL_INFOSYS']
+    # if 'csv' in OPTION and 'json' in OPTION and 'list' not in OPTION:
+    #     sys.exit('Error: Please choose between csv and json.')
+    # elif 'csv' in OPTION and 'list' not in OPTION:
+    #     if 'verbose' in OPTION:
+    #         print 'Output in csv formating'
+    if "json" in OPTION and "list" not in OPTION:
+        if "verbose" in OPTION:
+            print("Output in json formating")
+    if "host" not in OPTION:
+        if "LCG_GFAL_INFOSYS" in os.environ:
+            OPTION["host"] = os.environ["LCG_GFAL_INFOSYS"]
         else:
-            sys.exit("Error 2: Please specify an host to query with -H or --host flag. Otherwise, by default the environmental variable LCG_GFAL_INFOSYS is used.")
-    if ':' not in OPTION['host']:
-        OPTION['host'] += ':2170'
-    if 'verbose' in OPTION:
-        print('Verbose mode enabled')
-        print('The following host will be used:', OPTION['host'])
+            sys.exit(
+                (
+                    "Error 2: Please specify an host to query with -H or --host flag. "
+                    "Or set LCG_GFAL_INFOSYS environment variable."
+                )
+            )
+    if ":" not in OPTION["host"]:
+        OPTION["host"] += ":2170"
+    if "verbose" in OPTION:
+        print("Verbose mode enabled")
+        print("The following host will be used:", OPTION["host"])
 
-    if 'bind' in OPTION:
-        if 'verbose' in OPTION:
-            print('The following binding will be used:', OPTION['bind'])
+    if "bind" in OPTION:
+        if "verbose" in OPTION:
+            print("The following binding will be used:", OPTION["bind"])
     else:
-        OPTION['bind'] = 'o=glue'
-        if 'verbose' in OPTION:
-            print('The default binding will be used:', OPTION['bind'])
-    if 'timeout' in OPTION:
-        if 'verbose' in OPTION:
-            print('Ldap timeout has been set to '+OPTION['timeout']+' second(s).')
-    if 'ce' in OPTION:
-        if 'verbose' in OPTION:
+        OPTION["bind"] = "o=glue"
+        if "verbose" in OPTION:
+            print("The default binding will be used:", OPTION["bind"])
+    if "timeout" in OPTION:
+        if "verbose" in OPTION:
+            print("Ldap timeout has been set to " + OPTION["timeout"] + " second(s).")
+    if "ce" in OPTION:
+        if "verbose" in OPTION:
             # FIXME: Be more specific with CREAMCEID
-            print('The --ce option will display the ComputingShare objects.')
-    if 'se' in OPTION:
-        if 'verbose' in OPTION:
-            print('The --se option will display the Service objects that are from one of these types: Storage, DPM, SRM, STaaS, org.dcache.storage .')
-    if 'service' in OPTION:
-        if 'verbose' in OPTION:
-            print('The --service option will display the Service objects.')
-    if 'site' in OPTION:
-        if 'verbose' in OPTION:
-            print('The --site option will display the AdminDomain objects.')
-    if 'vo' in OPTION:
-        if 'verbose' in OPTION:
-            print('The --vo option will filter results by VO (alias PolicyRule. Eg: vo:atlas, vo:cms, ...): ')
+            print("The --ce option will display the ComputingShare objects.")
+    if "se" in OPTION:
+        if "verbose" in OPTION:
+            print(
+                (
+                    "The --se option will display the Service objects that are from "
+                    "one of these types: Storage, DPM, SRM, STaaS, org.dcache.storage."
+                )
+            )
+    if "service" in OPTION:
+        if "verbose" in OPTION:
+            print("The --service option will display the Service objects.")
+    if "site" in OPTION:
+        if "verbose" in OPTION:
+            print("The --site option will display the AdminDomain objects.")
+    if "vo" in OPTION:
+        if "verbose" in OPTION:
+            print(
+                (
+                    "The --vo option will filter results by VO (alias PolicyRule. "
+                    "Eg: vo:atlas, vo:cms, ...)"
+                )
+            )
+
 
 def shortcuts():
     # Shortcut options add some objects and specific filters to the CONF dictionnary
-    if 'ce' in OPTION:
-        CONF['ComputingShare'] = {'filter': {}, 'attribute': ['CE'], 'visible': True}
-        ELTS['ComputingShare'] = OrderedDict([('CE', ELTS['ComputingShare']['Other'])] + ELTS['ComputingShare'].items())
-        if 'vo' in OPTION:
-            CONF['MappingPolicy'] = {'filter': {'Rule': OPTION['vo']}, 'attribute': [], 'visible': False}
-    elif 'se' in OPTION:
-        CONF['Service'] = {'filter': {'Type':'Storage,DPM,SRM,STaaS,org.dcache.storage'}, 'attribute': ['ID'], 'visible': True}
-        #ELTS['Service'] = OrderedDict([('SE', ELTS['Service']['ID'])] + ELTS['Service'].items())
-        if 'vo' in OPTION:
-            CONF['AccessPolicy'] = {'filter': {'Rule': OPTION['vo']}, 'attribute': [], 'visible': False}
-            CONF['Endpoint'] = {'filter': {}, 'attribute': [], 'visible': False}
-    elif 'service' in OPTION:
-        CONF['Service'] = {'filter': {}, 'attribute': ['ID'], 'visible': True}
-        #ELTS['Service'] = OrderedDict([('Service', ELTS['Service']['ID'])] + ELTS['Service'].items())
-        if 'vo' in OPTION:
-            CONF['AccessPolicy'] = {'filter': {'Rule': OPTION['vo']}, 'attribute': [], 'visible': False}
-            CONF['Endpoint'] = {'filter': {}, 'attribute': [], 'visible': False}
-    elif 'site' in OPTION:
-        CONF['AdminDomain'] = {'filter': {}, 'attribute': ['ID'], 'visible': True}
-        #ELTS['AdminDomain'] = OrderedDict([('Site', ELTS['AdminDomain']['ID'])] + ELTS['AdminDomain'].items())
-        if 'vo' in OPTION:
-            CONF['Service'] = {'filter': {}, 'attribute': [], 'visible': False}
-            CONF['AccessPolicy'] = {'filter': {'Rule': OPTION['vo']}, 'attribute': [], 'visible': False}
-            CONF['Endpoint'] = {'filter': {}, 'attribute': [], 'visible': False}
+    if "ce" in OPTION:
+        CONF["ComputingShare"] = {"filter": {}, "attribute": ["CE"], "visible": True}
+        ELTS["ComputingShare"] = OrderedDict(
+            [("CE", ELTS["ComputingShare"]["Other"])] + ELTS["ComputingShare"].items()
+        )
+        if "vo" in OPTION:
+            CONF["MappingPolicy"] = {
+                "filter": {"Rule": OPTION["vo"]},
+                "attribute": [],
+                "visible": False,
+            }
+    elif "se" in OPTION:
+        CONF["Service"] = {
+            "filter": {"Type": "Storage,DPM,SRM,STaaS,org.dcache.storage"},
+            "attribute": ["ID"],
+            "visible": True,
+        }
+        # ELTS['Service'] = OrderedDict([('SE', ELTS['Service']['ID'])]
+        # + ELTS['Service'].items())
+        if "vo" in OPTION:
+            CONF["AccessPolicy"] = {
+                "filter": {"Rule": OPTION["vo"]},
+                "attribute": [],
+                "visible": False,
+            }
+            CONF["Endpoint"] = {"filter": {}, "attribute": [], "visible": False}
+    elif "service" in OPTION:
+        CONF["Service"] = {"filter": {}, "attribute": ["ID"], "visible": True}
+        # ELTS['Service'] = OrderedDict([('Service', ELTS['Service']['ID'])]
+        # + ELTS['Service'].items())
+        if "vo" in OPTION:
+            CONF["AccessPolicy"] = {
+                "filter": {"Rule": OPTION["vo"]},
+                "attribute": [],
+                "visible": False,
+            }
+            CONF["Endpoint"] = {"filter": {}, "attribute": [], "visible": False}
+    elif "site" in OPTION:
+        CONF["AdminDomain"] = {"filter": {}, "attribute": ["ID"], "visible": True}
+        # ELTS['AdminDomain'] = OrderedDict([('Site', ELTS['AdminDomain']['ID'])]
+        # + ELTS['AdminDomain'].items())
+        if "vo" in OPTION:
+            CONF["Service"] = {"filter": {}, "attribute": [], "visible": False}
+            CONF["AccessPolicy"] = {
+                "filter": {"Rule": OPTION["vo"]},
+                "attribute": [],
+                "visible": False,
+            }
+            CONF["Endpoint"] = {"filter": {}, "attribute": [], "visible": False}
+
 
 def parse_conf(args):
     # Sort the other arguments between objects, filters and attributes:
-    if 'list' in OPTION:
-        if OPTION['list'] in ELTS:
-            CONF[OPTION['list']] = {'filter': {}, 'attribute': [], 'visible': True}
-        if '.' in OPTION['list']:
-            object, attribute = OPTION['list'].split(".")
-            CONF[object] = {'filter': {}, 'attribute': [], 'visible': True}
-            OPTION['list'] = attribute
+    if "list" in OPTION:
+        if OPTION["list"] in ELTS:
+            CONF[OPTION["list"]] = {"filter": {}, "attribute": [], "visible": True}
+        if "." in OPTION["list"]:
+            object, attribute = OPTION["list"].split(".")
+            CONF[object] = {"filter": {}, "attribute": [], "visible": True}
+            OPTION["list"] = attribute
 
     for arg in list(args):
-         # Identify the objects and put them in the CONF dictionnary
+        # Identify the objects and put them in the CONF dictionnary
         if arg in ELTS:
             if arg not in CONF:
-                CONF[arg] = {'filter': {}, 'attribute': [], 'visible': True}
+                CONF[arg] = {"filter": {}, "attribute": [], "visible": True}
             args.remove(arg)
 
     for arg in args:
         # Identify filters and put them in the CONF dictionnary
-        if '=' in arg:
-            filter, value = arg.split('=')
+        if "=" in arg:
+            filter, value = arg.split("=")
 
-            if '.' in filter:
-                object, filter = filter.split('.')
+            if "." in filter:
+                object, filter = filter.split(".")
             elif len(CONF) > 1:
-                sys.exit('Error 3: If you use more than one object you should precise which object each filter refers to. Eg: Object1.filter1=value1 Object2.filter2=value2 ...')
+                sys.exit(
+                    (
+                        "Error 3: If you use more than one object you should precise "
+                        "which object each filter refers to. "
+                        "Eg: Object1.filter1=value1 Object2.filter2=value2 ..."
+                    )
+                )
             else:
                 object = list(CONF.keys())[0]
 
             if object in CONF:
-                CONF[object]['filter'][filter] = value
+                CONF[object]["filter"][filter] = value
             elif object in ELTS:
-                CONF[object] = {'filter': {filter: value}, 'attribute': [], 'visible': True}
+                CONF[object] = {
+                    "filter": {filter: value},
+                    "attribute": [],
+                    "visible": True,
+                }
             else:
-                sys.exit('Error 4: ' + object + 'is not a valid object.')
-            # FIXME: UGLY
-            if 'ce' in OPTION and filter == 'CE':
-                CONF[object]['filter'][filter] = '*'+CONF[object]['filter'][filter]+'*'
+                sys.exit("Error 4: " + object + "is not a valid object.")
+            # FIXME: Ugly
+            if "ce" in OPTION and filter == "CE":
+                CONF[object]["filter"][filter] = (
+                    "*" + CONF[object]["filter"][filter] + "*"
+                )
 
         # Identify attributes to display and put them in the CONF dictionnary
         else:
-            if '.' in arg:
-                object, attribute = arg.split('.')
+            if "." in arg:
+                object, attribute = arg.split(".")
             elif len(CONF) > 1:
-                sys.exit('Error 3: If you use more than one object you should precise which object each attributes refers to. Eg: Object1.attribute1 Object2.attribute2 ...')
+                sys.exit(
+                    (
+                        "Error 3: If you use more than one object you should precise "
+                        "which object each attributes refers to. "
+                        "Eg: Object1.attribute1 Object2.attribute2 ..."
+                    )
+                )
             else:
                 object = list(CONF.keys())[0]
                 attribute = arg
             if object in CONF:
-                CONF[object]['attribute'].append(attribute)
+                CONF[object]["attribute"].append(attribute)
             elif object in ELTS:
-                CONF[object] = {'filter': {}, 'attribute': [attribute], 'visible': True}
+                CONF[object] = {"filter": {}, "attribute": [attribute], "visible": True}
             else:
-                sys.exit('Error 4: ' + object + 'is not a valid object.')
+                sys.exit("Error 4: " + object + "is not a valid object.")
     if not CONF:
-        sys.exit('Error 5: Please specify at least one object.')
+        sys.exit("Error 5: Please specify at least one object.")
+
 
 def validate_conf():
-    #if 'ComputingShare' in CONF:
-    #    CONF['Share'] = CONF['ComputingShare']
-    #    del CONF['ComputingShare']
-    #    CONF['Share']['filter']['objectClass'] = 'GLUE2ComputingShare'
+    # if 'ComputingShare' in CONF:
+    #     CONF['Share'] = CONF['ComputingShare']
+    #     del CONF['ComputingShare']
+    #     CONF['Share']['filter']['objectClass'] = 'GLUE2ComputingShare'
 
     # Object
-    if 'verbose' in OPTION:
+    if "verbose" in OPTION:
         if len(CONF) == 1:
-            print('The specified object is '+list(CONF.keys())[0]+'.')
+            print("The specified object is " + list(CONF.keys())[0] + ".")
         else:
-            print('The specified objects are: '+', '.join(list(CONF.keys()))+'.')
-    if 'list' in OPTION:
+            print("The specified objects are: " + ", ".join(list(CONF.keys())) + ".")
+    if "list" in OPTION:
         if len(CONF) > 1:
-            sys.exit('Error 6: You have too many objects. You can only see the values of an attribute from one object.')
-        if OPTION['list'] in ELTS:
-            if 'verbose' in OPTION:
-                print('List all the attributes from the following object:', OPTION['list'])
-        elif OPTION['list'] in ELTS[list(CONF.keys())[0]]:
-            if 'verbose' in OPTION:
-                print('List all the possible values for the following attribute:', OPTION['list'])
+            sys.exit(
+                (
+                    "Error 6: You have too many objects. You can only see the values "
+                    "of an attribute from one object."
+                )
+            )
+        if OPTION["list"] in ELTS:
+            if "verbose" in OPTION:
+                print(
+                    "List all the attributes from the following object:", OPTION["list"]
+                )
+        elif OPTION["list"] in ELTS[list(CONF.keys())[0]]:
+            if "verbose" in OPTION:
+                print(
+                    "List all the possible values for the following attribute:",
+                    OPTION["list"],
+                )
 
         else:
-            sys.exit('Error 7: '+OPTION['list']+' is not a valid attribute.')
+            sys.exit("Error 7: " + OPTION["list"] + " is not a valid attribute.")
         return 0
 
-    OPTION['objects'] = OrderedDict([])
+    OPTION["objects"] = OrderedDict([])
+
     def sortObjects(obj):
-        listO = OrderedDict([(ELTS[obj]['ID'],obj)])
+        listO = OrderedDict([(ELTS[obj]["ID"], obj)])
         for att in ELTS[obj]:
-            if 'ID' in att and len(att) > 2:
+            if "ID" in att and len(att) > 2:
                 for i, o in enumerate(CONF):
-                    if att == ELTS[o]['ID']:
-                        if o in OPTION['objects'].values():
-                            listO.update(OPTION['objects'])
+                    if att == ELTS[o]["ID"]:
+                        if o in OPTION["objects"].values():
+                            listO.update(OPTION["objects"])
                         else:
                             listO.update(sortObjects(o))
                         break
         return listO
+
     for obj in CONF.keys():
-        if obj not in OPTION['objects'].values():
-            OPTION['objects'] = sortObjects(obj)
-    items = OPTION['objects'].items()
+        if obj not in OPTION["objects"].values():
+            OPTION["objects"] = sortObjects(obj)
+    items = OPTION["objects"].items()
     list(items).reverse()
-    OPTION['objects'] = OrderedDict(items)
-    if sorted(CONF.keys()) != sorted(OPTION['objects'].values()):
-        sys.exit('Error 8: You canno\'t combine these objects: '+', '.join(CONF))
+    OPTION["objects"] = OrderedDict(items)
+    if sorted(CONF.keys()) != sorted(OPTION["objects"].values()):
+        sys.exit("Error 8: You canno't combine these objects: " + ", ".join(CONF))
 
     for obj in CONF:
         # Filters
-        if CONF[obj]['filter']:
-            for filter in CONF[obj]['filter']:
+        if CONF[obj]["filter"]:
+            for filter in CONF[obj]["filter"]:
                 # FIXME: TOCHECK
-                if filter not in ELTS[obj] and filter != 'objectClass':
-                    sys.exit('Error 9: '+filter+' is not a valid filter from the object '+obj)
-            if 'verbose' in OPTION:
-                for filter in CONF[obj]['filter']:
-                    print('Filter results by the following '+obj+'.'+filter+':', CONF[obj]['filter'][filter])
+                if filter not in ELTS[obj] and filter != "objectClass":
+                    sys.exit(
+                        "Error 9: "
+                        + filter
+                        + " is not a valid filter from the object "
+                        + obj
+                    )
+            if "verbose" in OPTION:
+                for filter in CONF[obj]["filter"]:
+                    print(
+                        "Filter results by the following " + obj + "." + filter + ":",
+                        CONF[obj]["filter"][filter],
+                    )
 
         # Attributes
-        if CONF[obj]['attribute']:
-            for att in CONF[obj]['attribute']:
+        if CONF[obj]["attribute"]:
+            for att in CONF[obj]["attribute"]:
                 if att not in ELTS[obj]:
-                    sys.exit('Error 10: '+att+' is not a valid attribute from the object '+obj)
-        elif CONF[obj]['visible']:
-            CONF[obj]['attribute'] = ELTS[obj].keys()
-        if 'verbose' in OPTION:
-            print('The following attribute(s) of '+obj+' will be displayed:', ', '.join(CONF[obj]['attribute']))
+                    sys.exit(
+                        "Error 10: "
+                        + att
+                        + " is not a valid attribute from the object "
+                        + obj
+                    )
+        elif CONF[obj]["visible"]:
+            CONF[obj]["attribute"] = ELTS[obj].keys()
+        if "verbose" in OPTION:
+            print(
+                "The following attribute(s) of " + obj + " will be displayed:",
+                ", ".join(CONF[obj]["attribute"]),
+            )
+
 
 def request(filter=None):
     """Returns the result of the ldap request with the filter given"""
 
     def handler(signum, frame):
-        sys.exit('Error 11: Timeout to contact the LDAP server.')
+        sys.exit("Error 11: Timeout to contact the LDAP server.")
+
     try:
-        t = int(OPTION['timeout'])
+        t = int(OPTION["timeout"])
     except (ValueError, KeyError):
         t = TIMEOUT
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(t)
-    if 'host' in OPTION:
+    if "host" in OPTION:
         try:
-            con = ldap.initialize('ldap://'+OPTION['host'])
+            con = ldap.initialize("ldap://" + OPTION["host"])
             if filter:
-                result = con.result(con.search(OPTION['bind'], ldap.SCOPE_SUBTREE, filter))[1]
+                result = con.result(
+                    con.search(OPTION["bind"], ldap.SCOPE_SUBTREE, filter)
+                )[1]
             else:
-                result = con.result(con.search(OPTION['bind'], ldap.SCOPE_SUBTREE))[1]
+                result = con.result(con.search(OPTION["bind"], ldap.SCOPE_SUBTREE))[1]
         except ldap.SERVER_DOWN:
-            sys.exit('Error 12: Can\'t contact the LDAP server. Please check your host.')
+            sys.exit("Error 12: Can't contact the LDAP server. Please check your host.")
     return result
 
-def list_object():
-    """Returns a dictionary of filtered results from a ldap request""" 
 
-    dic = {} # Store the final results
-    for obj in OPTION['objects'].values():
-        dic[obj] = {} # Create a dictionnary for each object
+def list_object():
+    """Returns a dictionary of filtered results from a ldap request"""
+
+    # Store the final results
+    dic = {}
+    for obj in OPTION["objects"].values():
+        # Create a dictionnary for each object
+        dic[obj] = {}
 
         # Construct the filter
-        filter = ''
-        for attr in CONF[obj]['filter']:
-            value = CONF[obj]['filter'][attr]
-            if ',' in value:
-                filter += '(|(GLUE2'+ELTS[obj][attr] + '=' + value.replace(',', ')(GLUE2'+ELTS[obj][attr] + '=')+'))'
-            elif attr == 'objectClass':
-                filter += '(objectClass=' + value + ')'
+        filter = ""
+        for attr in CONF[obj]["filter"]:
+            value = CONF[obj]["filter"][attr]
+            if "," in value:
+                filter += (
+                    "(|(GLUE2"
+                    + ELTS[obj][attr]
+                    + "="
+                    + value.replace(",", ")(GLUE2" + ELTS[obj][attr] + "=")
+                    + "))"
+                )
+            elif attr == "objectClass":
+                filter += "(objectClass=" + value + ")"
             else:
-                filter += '(GLUE2'+ELTS[obj][attr] + '=' + value + ')'
+                filter += "(GLUE2" + ELTS[obj][attr] + "=" + value + ")"
 
         # Main loop
-        result = request('(&(objectClass=GLUE2' + obj + ')' + filter + ')')
+        result = request("(&(objectClass=GLUE2" + obj + ")" + filter + ")")
 
         for res in result:
-            id = res[1]['GLUE2' + ELTS[obj]['ID']][0] # ID of the entry
+            # ID of the entry
+            id = res[1]["GLUE2" + ELTS[obj]["ID"]][0]
             if id not in dic[obj]:
-                dic[obj][id] = {} # Creates a dictionnary for each ID of an object
+                # Creates a dictionnary for each ID of an object
+                dic[obj][id] = {}
                 dic[obj][id][obj] = OrderedDict([])
             for att in ELTS[obj]:
-                realID = 'GLUE2' + ELTS[obj][att] # Real ID of each attributes
+                # Real ID of each attributes
+                realID = "GLUE2" + ELTS[obj][att]
                 if realID in res[1]:
-                    dic[obj][id][obj][att] = res[1][realID] # Affects the value
+                    # Affects the value
+                    dic[obj][id][obj][att] = res[1][realID]
                 else:
                     dic[obj][id][obj][att] = None
-            if len(dic) > 1: # If an other object has already been requested
+            # If an other object has already been requested
+            if len(dic) > 1:
                 for att in ELTS[obj]:
-                    if 'ID' in att and len(att) > 2 and att in OPTION['objects']: # For each foreignkey
-                        realID = 'GLUE2' + ELTS[obj][att]
+                    # For each foreignkey
+                    if "ID" in att and len(att) > 2 and att in OPTION["objects"]:
+                        realID = "GLUE2" + ELTS[obj][att]
                         if realID in res[1]:
-                            foreignObject = OPTION['objects'][att]
+                            foreignObject = OPTION["objects"][att]
                             foreignKey = res[1][realID][0]
                             if foreignKey in dic[foreignObject]:
                                 for a in dic[foreignObject][foreignKey]:
                                     dic[obj][id][a] = dic[foreignObject][foreignKey][a]
                         else:
-                            pass # FIXME: FAUT faire quoi la?
-    main_object = next(reversed(OPTION['objects'].values()))
+                            # FIXME: What should be do here?
+                            pass
+    main_object = next(reversed(OPTION["objects"].values()))
     return dic[main_object]
 
+
 def list_attributes():
-    """Returns a list of values for a given attribute""" 
-    if OPTION['list'] in ELTS:
-        attr_list = ELTS[OPTION['list']]
+    """Returns a list of values for a given attribute"""
+    if OPTION["list"] in ELTS:
+        attr_list = ELTS[OPTION["list"]]
     else:
-        attribute = OPTION['list']
+        attribute = OPTION["list"]
         object = list(CONF.keys())[0]
-        id = 'GLUE2' + ELTS[object][attribute]
-        result = request('objectClass=GLUE2' + object)
+        id = "GLUE2" + ELTS[object][attribute]
+        result = request("objectClass=GLUE2" + object)
         attr_list = []
         for res in result:
             if id in res[1]:
-                for att in res[1][id]:
+                for att in [x.decode("utf-8") for x in res[1][id]]:
                     if att not in attr_list:
                         attr_list.append(att)
             else:
-                if 'None' not in attr_list:
-                    attr_list.append('None')
+                if "None" not in attr_list:
+                    attr_list.append("None")
         attr_list.sort()
     return attr_list
 
-def serialize_output(result):
-    """Return the output with the wished format""" 
 
-    if 'list' in OPTION:
-        output = '\n'.join(result)
-    elif 'csv' in OPTION:
+def decode_dict(d):
+    """Convert keys and values of a dict from byte to string"""
+    rval = {}
+    if not isinstance(d, dict):
+        if isinstance(d, (tuple, list, set)):
+            v = [decode_dict(x) for x in d]
+            return v
+        else:
+            if isinstance(d, bytes):
+                d = d.decode("utf-8")
+            return d
+
+    for k, v in d.items():
+        if isinstance(k, bytes):
+            k = k.decode("utf-8")
+        if isinstance(v, bytes):
+            v = v.decode("utf-8")
+        if isinstance(v, dict):
+            v = decode_dict(v)
+        elif isinstance(v, (tuple, list, set)):
+            v = [decode_dict(x) for x in v]
+        rval[k] = v
+
+    return rval
+
+
+def serialize_output(result):
+    """Return the output with the wished format"""
+
+    if "list" in OPTION:
+        output = "\n".join(result)
+    elif "csv" in OPTION:
         pass
         csv_list = []
         titles = []
-        for att in CONF['attribute']:
-           titles.append(att) 
-        csv_list.append(','.join(titles))
+        for att in CONF["attribute"]:
+            titles.append(att)
+        csv_list.append(",".join(titles))
         for id in result:
             tmp_list = []
-            for att in CONF['attribute']:
-                if result[id][att] == None:
-                    tmp_list.append('None')
+            for att in CONF["attribute"]:
+                if result[id][att] is None:
+                    tmp_list.append("None")
                 elif len(result[id][att]) > 1:
-                    tmp_list.append('"'+','.join(result[id][att])+'"')
+                    tmp_list.append('"' + ",".join(result[id][att]) + '"')
                 else:
                     tmp_list.append(result[id][att][0])
-            csv_list.append(','.join(tmp_list))
-        output = '\n'.join(csv_list)
-    elif 'json' in OPTION:
-        for entry in result:
-                if isinstance(entry,bytes):
-                    result[entry.decode("utf-8")] = result[entry]
-                    del result[entry]
-        for entry in result:
-            for obj in result[entry]:
-                for attribute in result[entry][obj]:
-                    i=0
-                    for value in result[entry][obj][attribute]:
-                        if isinstance(value,bytes):
-                            value = value.decode("utf-8")
-                            result[entry][obj][attribute][i]=value
-                        i+=1
+            csv_list.append(",".join(tmp_list))
+        output = "\n".join(csv_list)
+    elif "json" in OPTION:
+        result = decode_dict(result)
         output = json.dumps(result)
     else:
         output_list = []
         for id in result:
-                if len(result[id]) != len(OPTION['objects']):
-                    continue
-                for obj in result[id]:
-                    if 'ce' in OPTION and obj == 'ComputingShare' and 'Other' in result[id][obj] and result[id]['ComputingShare']['Other']:
-                        ce = ', '.join(result[id]['ComputingShare']['CE'])
-                        start = ce.find('CREAMCEId=') + 10
-                        ce = ce[start:ce.find(',',start)]
-                        result[id]['ComputingShare']['CE'] = [ce]
-                    for att in result[id][obj]:
-                        if att in CONF[obj]['attribute']:
-                            if len(CONF) > 1:
-                                res = obj+'.'+att+': '
-                            else:
-                                res = att+': '
-                            if not result[id][obj][att]:
-                                res += 'None'
-                            else:
-                                res = ",".join([s.decode("utf-8") for s in result[id][obj][att]])
-                            output_list.append(res)
-                output_list.append('')
-        output = '\n'.join(output_list)
+            if len(result[id]) != len(OPTION["objects"]):
+                continue
+            for obj in result[id]:
+                if (
+                    "ce" in OPTION
+                    and obj == "ComputingShare"
+                    and "Other" in result[id][obj]
+                    and result[id]["ComputingShare"]["Other"]
+                ):
+                    ce = ", ".join(result[id]["ComputingShare"]["CE"])
+                    start = ce.find("CREAMCEId=") + 10
+                    ce = ce[start : ce.find(",", start)]
+                    result[id]["ComputingShare"]["CE"] = [ce]
+                for att in result[id][obj]:
+                    if att in CONF[obj]["attribute"]:
+                        if len(CONF) > 1:
+                            res = obj + "." + att + ": "
+                        else:
+                            res = att + ": "
+                        if not result[id][obj][att]:
+                            res += "None"
+                        else:
+                            res = ",".join(
+                                [s.decode("utf-8") for s in result[id][obj][att]]
+                            )
+                        output_list.append(res)
+            output_list.append("")
+        output = "\n".join(output_list)
     return output
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
