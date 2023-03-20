@@ -54,7 +54,7 @@ jobs:
         with:
           name: rpms${{ matrix.almalinux-version }}
           path: |
-            build/RPMS/noarch/bdii-config-site-*.el${{ matrix.almalinux-version }}.noarch.rpm
+            build/RPMS/noarch/ginfo-*.el${{ matrix.almalinux-version }}.noarch.rpm
 
   # XXX: python3 comes from EPEL
   install-centos7:
