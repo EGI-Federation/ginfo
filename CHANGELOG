@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [1.10.0] - 2023-03-20
+
+### Added
+
+- Update source URL information, package additional documentation, build using AlmaLinux. (#3) (Baptiste Grenier)
+
 ## [1.9.0] 2014-08-29
 ### Added
 - Beta version for the version 2 of ginfo which allow requests on multiple objects (Ivan Calvet)
