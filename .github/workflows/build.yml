@@ -68,7 +68,7 @@ jobs:
           name: rpms7
       - name: Install generated RPMs
         run: |
-          yum install epel-release
+          yum install -y epel-release
           yum localinstall -y ginfo-*.el7.noarch.rpm
 
   almalinux8-install:
