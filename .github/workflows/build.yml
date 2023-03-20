@@ -30,7 +30,7 @@ jobs:
             build/RPMS/noarch/ginfo-*.el7.noarch.rpm
 
   # Use a matrix for AlmaLinux versions
-  build:
+  build-almalinux:
     strategy:
       matrix:
         almalinux-version: [8, 9]
@@ -71,28 +71,19 @@ jobs:
           yum install -y epel-release
           yum localinstall -y ginfo-*.el7.noarch.rpm
 
-  almalinux8-install:
-    name: Install AlmaLinux 8 RPMs
-    needs: build
+  # Use a matrix for AlmaLinux versions
+  install-almalinux:
+    strategy:
+      matrix:
+        almalinux-version: [8, 9]
+    name: Install AlmaLinux ${{ matrix.almalinux-version }} RPMs
+    needs: build-almalinux
     runs-on: ubuntu-latest
-    container: almalinux:8
+    container: almalinux:${{ matrix.almalinux-version }}
     steps:
       - uses: actions/download-artifact@v3
         with:
-          name: rpms8
+          name: rpms${{ matrix.almalinux-version }}
       - name: Install generated RPMs
         run: |
-          yum localinstall -y ginfo-*.el8.noarch.rpm
-
-  almalinux9-install:
-    name: Install AlmaLinux 9 RPMs
-    needs: build
-    runs-on: ubuntu-latest
-    container: almalinux:9
-    steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: rpms9
-      - name: Install generated RPMs
-        run: |
-          yum localinstall -y ginfo-*.el9.noarch.rpm
+          yum localinstall -y ginfo-*.el${{ matrix.almalinux-version }}.noarch.rpm
