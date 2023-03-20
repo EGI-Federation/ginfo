@@ -362,7 +362,7 @@ class TestGinfo(unittest.TestCase):
                 for j in list_results[att][2]:
                     if j and j.find(" ") == -1:
                         expected_items = [
-                            "Verbose mode enabled\nOutput in csv formating\nThe following host will be used: "
+                            "Verbose mode enabled\nOutput in csv formating\nThe following host will be used: "  # noqa: E501
                             + host
                             + ":"
                             + port
@@ -370,7 +370,7 @@ class TestGinfo(unittest.TestCase):
                             + list_results[att][1]
                             + ": "
                             + j
-                            + "\nThe following attribute(s) will be displayed: ServiceID"
+                            + "\nThe following attribute(s) will be displayed: ServiceID"  # noqa: E501
                         ]
                         expected_items.append("ServiceID")
                         expected_items.extend(list_results[att][2][j])
@@ -384,7 +384,7 @@ class TestGinfo(unittest.TestCase):
             for i in (att, list_results[att][1]):
                 if i not in ["id", "ServiceID"]:
                     expected_items = [
-                        "Verbose mode enabled\nOutput in csv formating\nThe following host will be used: "
+                        "Verbose mode enabled\nOutput in csv formating\nThe following host will be used: "  # noqa: E501
                         + host
                         + ":"
                         + port
@@ -437,7 +437,7 @@ class TestGinfo(unittest.TestCase):
             ("--id service_2 -u ldap://host:2170/ZZZ id", "ServiceID"),
             (
                 "--url ldap://host:2170/ZZZ PolicyRule vo EndpointQualityLevel cap",
-                'PolicyRule,EndpointQualityLevel,EndpointCapability\n"VO:atlas",production,"capability_b,capability_e"',
+                'PolicyRule,EndpointQualityLevel,EndpointCapability\n"VO:atlas",production,"capability_b,capability_e"',  # noqa: E501
             ),
             (
                 "-d domain_b --impv 5.0.0 -m implementation_name_b -n interface_name_b --cap capability_e --vo VO:atlas -u ldap://host:2170/ZZZ --intv 3.0.1 --ql production --type service_type_a --id service_3 id",  # noqa: E501
@@ -448,7 +448,7 @@ class TestGinfo(unittest.TestCase):
             ("--ql testing --type service_type_a vo", 'PolicyRule\n"ALL"'),
             (
                 "--impv 5.0.* id impv",
-                "ServiceID,EndpointImplementationVersion\nservice_1,5.0.0\nservice_3,5.0.0\nservice_2,5.0.1",
+                "ServiceID,EndpointImplementationVersion\nservice_1,5.0.0\nservice_3,5.0.0\nservice_2,5.0.1",  # noqa: E501
             ),
             (
                 "-v -i service_1 --clean --timeout 5 id",
