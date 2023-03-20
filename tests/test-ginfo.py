@@ -269,7 +269,7 @@ class TestGinfo(unittest.TestCase):
             + "\n\n!=\n\n"
             + str(expected_items)
         )
-        self.assertItemsEqual(res, expected_items, error)
+        self.assertEqual(res, expected_items, error)
 
     def assert_items_equal2(self, command, expected_items, error=None):
         if command not in result:
@@ -289,7 +289,7 @@ class TestGinfo(unittest.TestCase):
             + "\n\n!=\n\n"
             + str(expected_items)
         )
-        self.assertItemsEqual(res, expected_items, error)
+        self.assertEqual(res, expected_items, error)
 
     def assert_time_equal(self, command, expected_time):
         start_time = time.time()
