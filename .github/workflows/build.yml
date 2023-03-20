@@ -56,6 +56,7 @@ jobs:
           path: |
             build/RPMS/noarch/bdii-config-site-*.el${{ matrix.almalinux-version }}.noarch.rpm
 
+  # XXX: python3 comes from EPEL
   install-centos7:
     name: Install CentOS 7 RPMs
     needs: build-centos7
@@ -67,6 +68,7 @@ jobs:
           name: rpms7
       - name: Install generated RPMs
         run: |
+          yum install epel-release
           yum localinstall -y ginfo-*.el7.noarch.rpm
 
   almalinux8-install:
