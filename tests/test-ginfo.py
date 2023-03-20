@@ -78,14 +78,11 @@ host_message = "The following host will be used: " + host
 
 version_message = "ginfo V1.9.0"
 
-# noqa: E501
-normal_output = "EndpointCapability: capability_a, capability_b, capability_c\nServiceAdminDomainForeignKey: domain_a\nServiceID: service_1\nEndpointImplementationName: implementation_name_a\nEndpointImplementationVersion: 5.0.0\nEndpointInterfaceName: interface_name_a\nEndpointInterfaceVersion: 3.0.0\nEndpointQualityLevel: testing\nServiceType: service_type_a\nEndpointURL: ldap://host:2170/XXX\nPolicyRule: ALL\n"
+normal_output = "EndpointCapability: capability_a, capability_b, capability_c\nServiceAdminDomainForeignKey: domain_a\nServiceID: service_1\nEndpointImplementationName: implementation_name_a\nEndpointImplementationVersion: 5.0.0\nEndpointInterfaceName: interface_name_a\nEndpointInterfaceVersion: 3.0.0\nEndpointQualityLevel: testing\nServiceType: service_type_a\nEndpointURL: ldap://host:2170/XXX\nPolicyRule: ALL\n"  # noqa: E501
 
-# noqa: E501
-json_output = '{"service_1": {"EndpointImplementationVersion": "5.0.0", "ServiceAdminDomainForeignKey": "domain_a", "EndpointQualityLevel": "testing", "EndpointInterfaceVersion": "3.0.0", "EndpointImplementationName": "implementation_name_a", "PolicyRule": ["ALL"], "EndpointURL": "ldap://host:2170/XXX", "EndpointCapability": ["capability_a", "capability_b", "capability_c"], "ServiceID": "service_1", "EndpointInterfaceName": "interface_name_a", "ServiceType": "service_type_a"}}'
+json_output = '{"service_1": {"EndpointImplementationVersion": "5.0.0", "ServiceAdminDomainForeignKey": "domain_a", "EndpointQualityLevel": "testing", "EndpointInterfaceVersion": "3.0.0", "EndpointImplementationName": "implementation_name_a", "PolicyRule": ["ALL"], "EndpointURL": "ldap://host:2170/XXX", "EndpointCapability": ["capability_a", "capability_b", "capability_c"], "ServiceID": "service_1", "EndpointInterfaceName": "interface_name_a", "ServiceType": "service_type_a"}}'  # noqa: E501
 
-# noqa: E501
-csv_output = 'EndpointCapability,ServiceAdminDomainForeignKey,ServiceID,EndpointImplementationName,EndpointImplementationVersion,EndpointInterfaceName,EndpointInterfaceVersion,EndpointQualityLevel,ServiceType,EndpointURL,PolicyRule\n"capability_a,capability_b,capability_c",domain_a,service_1,implementation_name_a,5.0.0,interface_name_a,3.0.0,testing,service_type_a,ldap://host:2170/XXX,"ALL"'
+csv_output = 'EndpointCapability,ServiceAdminDomainForeignKey,ServiceID,EndpointImplementationName,EndpointImplementationVersion,EndpointInterfaceName,EndpointInterfaceVersion,EndpointQualityLevel,ServiceType,EndpointURL,PolicyRule\n"capability_a,capability_b,capability_c",domain_a,service_1,implementation_name_a,5.0.0,interface_name_a,3.0.0,testing,service_type_a,ldap://host:2170/XXX,"ALL"'  # noqa: E501
 
 emi_output = [
     "[",
@@ -411,13 +408,11 @@ class TestGinfo(unittest.TestCase):
             ("vo", 'PolicyRule\n"INVALID"'),
             (
                 "--clean",
-                # noqa: E501
-                'EndpointCapability,ServiceAdminDomainForeignKey,ServiceID,EndpointImplementationName,EndpointImplementationVersion,EndpointInterfaceName,EndpointInterfaceVersion,EndpointQualityLevel,ServiceType,EndpointURL,PolicyRule\n"capability_a,capability_d",INVALID,service_4,INVALID,INVALID,interface_name_a,INVALID,INVALID,service_type_b,INVALID,"INVALID"',
+                'EndpointCapability,ServiceAdminDomainForeignKey,ServiceID,EndpointImplementationName,EndpointImplementationVersion,EndpointInterfaceName,EndpointInterfaceVersion,EndpointQualityLevel,ServiceType,EndpointURL,PolicyRule\n"capability_a,capability_d",INVALID,service_4,INVALID,INVALID,interface_name_a,INVALID,INVALID,service_type_b,INVALID,"INVALID"',  # noqa: E501
             ),
             (
                 "--strict",
-                # noqa: E501
-                'EndpointCapability,ServiceAdminDomainForeignKey,ServiceID,EndpointImplementationName,EndpointImplementationVersion,EndpointInterfaceName,EndpointInterfaceVersion,EndpointQualityLevel,ServiceType,EndpointURL,PolicyRule\n"INVALID,INVALID",INVALID,service_4,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,"INVALID"',
+                'EndpointCapability,ServiceAdminDomainForeignKey,ServiceID,EndpointImplementationName,EndpointImplementationVersion,EndpointInterfaceName,EndpointInterfaceVersion,EndpointQualityLevel,ServiceType,EndpointURL,PolicyRule\n"INVALID,INVALID",INVALID,service_4,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,"INVALID"',  # noqa: E501
             ),
         ]
         for i, j in tests:
@@ -458,13 +453,11 @@ class TestGinfo(unittest.TestCase):
             ),
             (
                 "-v -i service_1 --clean --timeout 5 id",
-                # noqa: E501
-                "Verbose mode enabled\nOutput in csv formating\nThe following host will be used: localhost:2170\nResults have been cleaned.\nLdap timeout has been set to 5 second(s).\nFilter services by the following ServiceID: service_1\nThe following attribute(s) will be displayed: ServiceID\n\nServiceID\nservice_1",
+                "Verbose mode enabled\nOutput in csv formating\nThe following host will be used: localhost:2170\nResults have been cleaned.\nLdap timeout has been set to 5 second(s).\nFilter services by the following ServiceID: service_1\nThe following attribute(s) will be displayed: ServiceID\n\nServiceID\nservice_1",  # noqa: E501
             ),
             (
                 "-v --strict --list domain",
-                # noqa: E501
-                "Verbose mode enabled\nThe following host will be used: localhost:2170\nList all the possible values for the following attribute: ServiceAdminDomainForeignKey\nOption --csv is not compatible with --list option.\nResults have been cleaned strictly.\n\ndomain_a\ndomain_b\nINVALID",
+                "Verbose mode enabled\nThe following host will be used: localhost:2170\nList all the possible values for the following attribute: ServiceAdminDomainForeignKey\nOption --csv is not compatible with --list option.\nResults have been cleaned strictly.\n\ndomain_a\ndomain_b\nINVALID",  # noqa: E501
             ),
         ]
         for i, j in tests:
