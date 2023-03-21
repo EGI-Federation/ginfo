@@ -462,7 +462,7 @@ class TestGinfo(unittest.TestCase):
         for i, j in tests:
             self.assert_equal("ginfo -c " + i, j)
 
-    @unittest.skip("Workikng locally, not with GitHub actions, and not really meaningful")
+    @unittest.skip("Working locally, not within GA")
     def test9_timeout(self):
         self.assert_time_equal("ginfo --host bdii.scotgrid.ac.uk Endpoint", "60")
         self.assert_time_equal(
