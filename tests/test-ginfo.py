@@ -78,11 +78,11 @@ host_message = "The following host will be used: " + host
 
 version_message = "ginfo V1.9.0"
 
-normal_output = "EndpointCapability: capability_a, capability_b, capability_c\nServiceAdminDomainForeignKey: domain_a\nServiceID: service_1\nEndpointImplementationName: implementation_name_a\nEndpointImplementationVersion: 5.0.0\nEndpointInterfaceName: interface_name_a\nEndpointInterfaceVersion: 3.0.0\nEndpointQualityLevel: testing\nServiceType: service_type_a\nEndpointURL: ldap://host:2170/XXX\nPolicyRule: ALL\n"
+normal_output = "EndpointCapability: capability_a, capability_b, capability_c\nServiceAdminDomainForeignKey: domain_a\nServiceID: service_1\nEndpointImplementationName: implementation_name_a\nEndpointImplementationVersion: 5.0.0\nEndpointInterfaceName: interface_name_a\nEndpointInterfaceVersion: 3.0.0\nEndpointQualityLevel: testing\nServiceType: service_type_a\nEndpointURL: ldap://host:2170/XXX\nPolicyRule: ALL\n"  # noqa: E501
 
-json_output = '{"service_1": {"EndpointImplementationVersion": "5.0.0", "ServiceAdminDomainForeignKey": "domain_a", "EndpointQualityLevel": "testing", "EndpointInterfaceVersion": "3.0.0", "EndpointImplementationName": "implementation_name_a", "PolicyRule": ["ALL"], "EndpointURL": "ldap://host:2170/XXX", "EndpointCapability": ["capability_a", "capability_b", "capability_c"], "ServiceID": "service_1", "EndpointInterfaceName": "interface_name_a", "ServiceType": "service_type_a"}}'
+json_output = '{"service_1": {"EndpointImplementationVersion": "5.0.0", "ServiceAdminDomainForeignKey": "domain_a", "EndpointQualityLevel": "testing", "EndpointInterfaceVersion": "3.0.0", "EndpointImplementationName": "implementation_name_a", "PolicyRule": ["ALL"], "EndpointURL": "ldap://host:2170/XXX", "EndpointCapability": ["capability_a", "capability_b", "capability_c"], "ServiceID": "service_1", "EndpointInterfaceName": "interface_name_a", "ServiceType": "service_type_a"}}'  # noqa: E501
 
-csv_output = 'EndpointCapability,ServiceAdminDomainForeignKey,ServiceID,EndpointImplementationName,EndpointImplementationVersion,EndpointInterfaceName,EndpointInterfaceVersion,EndpointQualityLevel,ServiceType,EndpointURL,PolicyRule\n"capability_a,capability_b,capability_c",domain_a,service_1,implementation_name_a,5.0.0,interface_name_a,3.0.0,testing,service_type_a,ldap://host:2170/XXX,"ALL"'
+csv_output = 'EndpointCapability,ServiceAdminDomainForeignKey,ServiceID,EndpointImplementationName,EndpointImplementationVersion,EndpointInterfaceName,EndpointInterfaceVersion,EndpointQualityLevel,ServiceType,EndpointURL,PolicyRule\n"capability_a,capability_b,capability_c",domain_a,service_1,implementation_name_a,5.0.0,interface_name_a,3.0.0,testing,service_type_a,ldap://host:2170/XXX,"ALL"'  # noqa: E501
 
 emi_output = [
     "[",
@@ -269,7 +269,7 @@ class TestGinfo(unittest.TestCase):
             + "\n\n!=\n\n"
             + str(expected_items)
         )
-        self.assertItemsEqual(res, expected_items, error)
+        self.assertEqual(res, expected_items, error)
 
     def assert_items_equal2(self, command, expected_items, error=None):
         if command not in result:
@@ -289,7 +289,7 @@ class TestGinfo(unittest.TestCase):
             + "\n\n!=\n\n"
             + str(expected_items)
         )
-        self.assertItemsEqual(res, expected_items, error)
+        self.assertEqual(res, expected_items, error)
 
     def assert_time_equal(self, command, expected_time):
         start_time = time.time()
@@ -362,7 +362,7 @@ class TestGinfo(unittest.TestCase):
                 for j in list_results[att][2]:
                     if j and j.find(" ") == -1:
                         expected_items = [
-                            "Verbose mode enabled\nOutput in csv formating\nThe following host will be used: "
+                            "Verbose mode enabled\nOutput in csv formating\nThe following host will be used: "  # noqa: E501
                             + host
                             + ":"
                             + port
@@ -370,7 +370,7 @@ class TestGinfo(unittest.TestCase):
                             + list_results[att][1]
                             + ": "
                             + j
-                            + "\nThe following attribute(s) will be displayed: ServiceID"
+                            + "\nThe following attribute(s) will be displayed: ServiceID"  # noqa: E501
                         ]
                         expected_items.append("ServiceID")
                         expected_items.extend(list_results[att][2][j])
@@ -384,7 +384,7 @@ class TestGinfo(unittest.TestCase):
             for i in (att, list_results[att][1]):
                 if i not in ["id", "ServiceID"]:
                     expected_items = [
-                        "Verbose mode enabled\nOutput in csv formating\nThe following host will be used: "
+                        "Verbose mode enabled\nOutput in csv formating\nThe following host will be used: "  # noqa: E501
                         + host
                         + ":"
                         + port
@@ -408,11 +408,11 @@ class TestGinfo(unittest.TestCase):
             ("vo", 'PolicyRule\n"INVALID"'),
             (
                 "--clean",
-                'EndpointCapability,ServiceAdminDomainForeignKey,ServiceID,EndpointImplementationName,EndpointImplementationVersion,EndpointInterfaceName,EndpointInterfaceVersion,EndpointQualityLevel,ServiceType,EndpointURL,PolicyRule\n"capability_a,capability_d",INVALID,service_4,INVALID,INVALID,interface_name_a,INVALID,INVALID,service_type_b,INVALID,"INVALID"',
+                'EndpointCapability,ServiceAdminDomainForeignKey,ServiceID,EndpointImplementationName,EndpointImplementationVersion,EndpointInterfaceName,EndpointInterfaceVersion,EndpointQualityLevel,ServiceType,EndpointURL,PolicyRule\n"capability_a,capability_d",INVALID,service_4,INVALID,INVALID,interface_name_a,INVALID,INVALID,service_type_b,INVALID,"INVALID"',  # noqa: E501
             ),
             (
                 "--strict",
-                'EndpointCapability,ServiceAdminDomainForeignKey,ServiceID,EndpointImplementationName,EndpointImplementationVersion,EndpointInterfaceName,EndpointInterfaceVersion,EndpointQualityLevel,ServiceType,EndpointURL,PolicyRule\n"INVALID,INVALID",INVALID,service_4,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,"INVALID"',
+                'EndpointCapability,ServiceAdminDomainForeignKey,ServiceID,EndpointImplementationName,EndpointImplementationVersion,EndpointInterfaceName,EndpointInterfaceVersion,EndpointQualityLevel,ServiceType,EndpointURL,PolicyRule\n"INVALID,INVALID",INVALID,service_4,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,INVALID,"INVALID"',  # noqa: E501
             ),
         ]
         for i, j in tests:
@@ -437,10 +437,10 @@ class TestGinfo(unittest.TestCase):
             ("--id service_2 -u ldap://host:2170/ZZZ id", "ServiceID"),
             (
                 "--url ldap://host:2170/ZZZ PolicyRule vo EndpointQualityLevel cap",
-                'PolicyRule,EndpointQualityLevel,EndpointCapability\n"VO:atlas",production,"capability_b,capability_e"',
+                'PolicyRule,EndpointQualityLevel,EndpointCapability\n"VO:atlas",production,"capability_b,capability_e"',  # noqa: E501
             ),
             (
-                "-d domain_b --impv 5.0.0 -m implementation_name_b -n interface_name_b --cap capability_e --vo VO:atlas -u ldap://host:2170/ZZZ --intv 3.0.1 --ql production --type service_type_a --id service_3 id",
+                "-d domain_b --impv 5.0.0 -m implementation_name_b -n interface_name_b --cap capability_e --vo VO:atlas -u ldap://host:2170/ZZZ --intv 3.0.1 --ql production --type service_type_a --id service_3 id",  # noqa: E501
                 "ServiceID\nservice_3",
             ),
             ("--vo ALL ServiceID", "ServiceID\nservice_1\nservice_2"),
@@ -448,21 +448,21 @@ class TestGinfo(unittest.TestCase):
             ("--ql testing --type service_type_a vo", 'PolicyRule\n"ALL"'),
             (
                 "--impv 5.0.* id impv",
-                "ServiceID,EndpointImplementationVersion\nservice_1,5.0.0\nservice_3,5.0.0\nservice_2,5.0.1",
+                "ServiceID,EndpointImplementationVersion\nservice_1,5.0.0\nservice_3,5.0.0\nservice_2,5.0.1",  # noqa: E501
             ),
             (
                 "-v -i service_1 --clean --timeout 5 id",
-                "Verbose mode enabled\nOutput in csv formating\nThe following host will be used: localhost:2170\nResults have been cleaned.\nLdap timeout has been set to 5 second(s).\nFilter services by the following ServiceID: service_1\nThe following attribute(s) will be displayed: ServiceID\n\nServiceID\nservice_1",
+                "Verbose mode enabled\nOutput in csv formating\nThe following host will be used: localhost:2170\nResults have been cleaned.\nLdap timeout has been set to 5 second(s).\nFilter services by the following ServiceID: service_1\nThe following attribute(s) will be displayed: ServiceID\n\nServiceID\nservice_1",  # noqa: E501
             ),
             (
                 "-v --strict --list domain",
-                "Verbose mode enabled\nThe following host will be used: localhost:2170\nList all the possible values for the following attribute: ServiceAdminDomainForeignKey\nOption --csv is not compatible with --list option.\nResults have been cleaned strictly.\n\ndomain_a\ndomain_b\nINVALID",
+                "Verbose mode enabled\nThe following host will be used: localhost:2170\nList all the possible values for the following attribute: ServiceAdminDomainForeignKey\nOption --csv is not compatible with --list option.\nResults have been cleaned strictly.\n\ndomain_a\ndomain_b\nINVALID",  # noqa: E501
             ),
         ]
         for i, j in tests:
             self.assert_equal("ginfo -c " + i, j)
 
-    @unittest.skip("Disabled to speed up debug")
+    @unittest.skip("Working locally, not within GA")
     def test9_timeout(self):
         self.assert_time_equal("ginfo --host bdii.scotgrid.ac.uk Endpoint", "60")
         self.assert_time_equal(
